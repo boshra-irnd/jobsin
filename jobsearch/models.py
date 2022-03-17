@@ -1,12 +1,21 @@
 from datetime import datetime
+from pyexpat import model
 from random import choices
 from statistics import mode
+from turtle import title
 from django.db import models
 from django.test import modify_settings
-from languages import fields
 from django_countries.fields import CountryField
+from django.conf import settings
+from django.contrib import admin
 # Create your models here.
 
+class JobCategory(models.Model):
+    title = models.CharField(max_length=255)
+    
+    def __str__(self) -> str:
+        return self.title
+       
 class Employee(models.Model):
     GENDER_FEMALE = 'F'
     GENDER_MALE = 'M'
@@ -24,30 +33,36 @@ class Employee(models.Model):
         (MARITAL_STATUS_DIVORCED, 'Divorced'),
         (MARITAL_STATUS_WIDOWED, 'Widowed'), 
     ]
-
-    first_name = models.CharField(max_length=255)	 
-    last_name = models.CharField(max_length=255)	
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)	
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS)
     # address-id
-    phone_number = models.IntegerField(max_length=11)
+    phone_number = models.CharField(max_length=12, null=True)
     date_of_birth = models.DateField()
     expected_salary	= models.IntegerField()
-    Preferred_job_category = models.CharField(max_length=255)
-    # educational_background-id 
+    Preferred_job_category = models.ForeignKey(JobCategory, on_delete=models.CASCADE, null=True, blank=True)
     # work experience-id 
     # languages-id = models.CharField(max_length=255)
     # software skills-id
     linkedin_profile = models.CharField(max_length=255)
     
+    def __str__(self) -> str:
+        return self.user.first_name + ' ' + self.user.last_name
+    @admin.display(ordering='user__first_name')
+    def first_name(self):
+        return self.user.first_name
+
+    @admin.display(ordering='user__last_name')
+    def last_name(self):
+        return self.user.last_name
 class Address(models.Model):
-    employee = models.OneToOneField(Employee, on_delete=models.CASCADE, primary_key=True)
+    employee = models.ForeignKey(Employee,on_delete=models.CASCADE, related_name='employee_arrdess')
     state = models.CharField(max_length=255)
     city = models.CharField(max_length=255)
     zip_code = models.IntegerField()
 
 class Languages(models.Model):
-    employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
+    employee = models.ForeignKey(Employee,on_delete=models.CASCADE, related_name='employee_language')
     LEVEL_ADVANCED = 'L'
     LEVEL_MEDIUM = 'M'
     LEVEL_INTRODUCTORY = 'I'
@@ -57,7 +72,7 @@ class Languages(models.Model):
         (LEVEL_INTRODUCTORY, 'Introductory')
     ]
     
-    language = fields.LanguageField()
+    title = models.CharField(max_length=255)
     skill_level = models.CharField(max_length=1, choices=SKILL_LEVEL)
 
 class EducationalBackground(models.Model):
@@ -74,10 +89,10 @@ class EducationalBackground(models.Model):
         (LEVEL_DOCTORAL, 'Doctoral')
     ]
     
-    YEAR_CHOICES = [(y,y) for y in range(1968, datetime.date.today().year)]
+    YEAR_CHOICES = [(y,y) for y in range(1968, datetime.now().year)]
     MONTH_CHOICES = [(m,m) for m in range(1,13)]
     
-    employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
+    employee = models.ForeignKey(Employee,on_delete=models.CASCADE, related_name='employee_educationalbackground')
     degree_level = models.CharField(max_length=2, choices=DEGREE_LEVEL)
     major = models.CharField(max_length=255)
     university = models.CharField(max_length=255)
@@ -86,29 +101,25 @@ class EducationalBackground(models.Model):
         decimal_places=2, 
         null=True)
     from_year = models.IntegerField(
-        max_length=4,
         choices=YEAR_CHOICES, 
         null=True, 
         blank=True)
     from_month = models.IntegerField(
-        max_length=2,
         choices=MONTH_CHOICES,
         null=True, 
         blank=True)
     to_year = models.IntegerField(
-        max_length=4,
         choices=YEAR_CHOICES,
         null=True, 
         blank=True)
     to_month = models.IntegerField(
-        max_length=2,
         choices=MONTH_CHOICES,
         null=True, 
         blank=True)
     studying =  models.BooleanField()
 
 class SoftwareSkills(models.Model):
-    employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
+    employee = models.ForeignKey(Employee,on_delete=models.CASCADE, related_name='employee_softwareskill')
     LEVEL_ADVANCED = 'L'
     LEVEL_MEDIUM = 'M'
     LEVEL_INTRODUCTORY = 'I'
@@ -123,7 +134,9 @@ class SoftwareSkills(models.Model):
 
 
 class WorkExperience(models.Model):
-    employee = models.ForeignKey(Employee,on_delete=models.CASCADE)
+    YEAR_CHOICES = [(y,y) for y in range(1968, datetime.now().year)]
+    MONTH_CHOICES = [(m,m) for m in range(1,13)]
+    employee = models.ForeignKey(Employee,on_delete=models.CASCADE, related_name='employee_workexperience')
     job_title = models.CharField(max_length=255)
     job_category = models.CharField(max_length=255)
     seniority_level = models.CharField(max_length=255)
@@ -131,22 +144,18 @@ class WorkExperience(models.Model):
     country = CountryField()
     city = models.CharField(max_length=255)
     from_month = models.IntegerField(
-        max_length=2,
         choices=MONTH_CHOICES,
         null=True, 
         blank=True)
     from_year = models.IntegerField(
-        max_length=4,
         choices=YEAR_CHOICES, 
         null=True, 
         blank=True)
     to_year = models.IntegerField(
-        max_length=4,
         choices=YEAR_CHOICES,
         null=True, 
         blank=True)
     to_month = models.IntegerField(
-        max_length=2,
         choices=MONTH_CHOICES,
         null=True, 
         blank=True)
