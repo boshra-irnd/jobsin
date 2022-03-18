@@ -21,9 +21,10 @@ class LanguagesSerializer(serializers.ModelSerializer):
         
         
 class EmployeeSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(read_only=True)
     class Meta:
         model = Employee
-        fields = ['user__first_name','user__last_name', 'gender', 'marital_status', 
+        fields = ['user_id','id' ,'first_name','last_name', 'gender', 'marital_status', 
                   'phone_number', 'date_of_birth', 'expected_salary',
                   'Preferred_job_category', 'linkedin_profile', 
                   'employee_arrdess', 'employee_language',

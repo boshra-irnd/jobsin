@@ -1,4 +1,4 @@
-import imp
+from urllib import response
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
@@ -7,13 +7,30 @@ from .models import (Employee, Address, Languages, SoftwareSkills,
 from .serializers import (EmployeeSerializer, AddressSerializer, SoftwareSkillSerializer,
                           LanguagesSerializer, EducationalBackgroundSerializer, 
                           WorkExperienceSerializer, JobCategorySerializer)
-from jobsearch import serializers
-from rest_framework.permissions import AllowAny, DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly, IsAdminUser, IsAuthenticated
+from jobsearch import permissions, serializers
+from rest_framework.permissions import AllowAny, DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly, IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from .permissions import IsAdminOrReadOnly
 # Create your views here.
 
 class EmployeeViewSet(ModelViewSet):
+    http_method_names = ['get', 'post', 'put']
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    @action(detail=False, methods=['GET', 'PUT'])
+    def me(self, request):
+        (employee, created) = Employee.objects.get_or_create(user_id=request.user.id)
+        if request.method == 'GET':
+            serializer = EmployeeSerializer(employee)
+            return Response(serializer.data)
+        elif request.method == 'PUT':
+            serializer = EmployeeSerializer(employee, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
     
 class AddressViewSet(ModelViewSet):
     serializer_class = AddressSerializer
@@ -39,8 +56,8 @@ class WorkExperienceViewSet(ModelViewSet):
     
 class JobCategoryViewSet(ModelViewSet):
     queryset = JobCategory.objects.all()
-    permission_classes = [IsAdminUser]
     serializer_class = JobCategorySerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 class EducationalBackgroundViewSet(ModelViewSet):
     queryset = EducationalBackground.objects.all()
