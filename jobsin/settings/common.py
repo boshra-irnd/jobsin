@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django_countries',
     'djoser',
     'rest_framework.authtoken',
+    'django_filters',
 ]
 
 MIDDLEWARE = [

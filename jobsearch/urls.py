@@ -2,21 +2,21 @@ from cgitb import lookup
 from posixpath import basename
 from django.urls import path
 from rest_framework_nested import routers
-from .views import (JobCategoryViewSet, AddressViewSet, EmployeeViewSet,
+from .views import (JobCategoryViewSet, EmployeeViewSet,
                     LanguagesViewSet, SoftwareSkillViewset, WorkExperienceViewSet,
                     EducationalBackgroundViewSet) 
 
 
 
-router = routers.SimpleRouter()
+router = routers.DefaultRouter()
 router.register(r'employee', EmployeeViewSet)
 router.register(r'jobcategory', JobCategoryViewSet)
-router.register(r'address', AddressViewSet, basename='address')
-router.register(r'language', LanguagesViewSet)
-router.register(r'softwareskill', SoftwareSkillViewset)
-router.register(r'workexperience', WorkExperienceViewSet)
-router.register(r'educationalbackground', EducationalBackgroundViewSet)
+
 employee_router = routers.NestedDefaultRouter(router, 'employee', lookup='employee')
-employee_router.register('address', AddressViewSet, basename='employees-address')
+
+employee_router.register('languages', LanguagesViewSet, basename='employee-language')
+employee_router.register('educationalbackground', EducationalBackgroundViewSet, basename='employee-educationalbackground')
+employee_router.register('workexperience', WorkExperienceViewSet, basename='employee-workexperience')
+employee_router.register('softwareskill', SoftwareSkillViewset, basename='employee-softwareskill')
 
 urlpatterns = router.urls + employee_router.urls

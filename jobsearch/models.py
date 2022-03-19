@@ -1,6 +1,7 @@
 from datetime import datetime
 from pyexpat import model
 from random import choices
+from re import L
 from statistics import mode
 from turtle import title
 from django.db import models
@@ -41,6 +42,9 @@ class Employee(models.Model):
     date_of_birth = models.DateField()
     expected_salary	= models.IntegerField()
     Preferred_job_category = models.ForeignKey(JobCategory, on_delete=models.CASCADE, null=True, blank=True)
+    state = models.ForeignKey('State', on_delete=models.CASCADE, null=True, blank=True)
+    city = models.ForeignKey('City', on_delete=models.CASCADE, null=True, blank=True)
+    zip_code = models.IntegerField()
     # work experience-id 
     # languages-id = models.CharField(max_length=255)
     # software skills-id
@@ -48,6 +52,7 @@ class Employee(models.Model):
     
     def __str__(self) -> str:
         return self.user.first_name + ' ' + self.user.last_name
+    
     @admin.display(ordering='user__first_name')
     def first_name(self):
         return self.user.first_name
@@ -55,15 +60,25 @@ class Employee(models.Model):
     @admin.display(ordering='user__last_name')
     def last_name(self):
         return self.user.last_name
-class Address(models.Model):
-    employee = models.ForeignKey(Employee,on_delete=models.CASCADE, related_name='employee_arrdess')
-    state = models.CharField(max_length=255)
-    city = models.CharField(max_length=255)
-    zip_code = models.IntegerField()
+    
+    
+class State(models.Model):
+    name = models.CharField(max_length=60)
+    def __str__(self) -> str:
+        return self.name
+
+
+class City(models.Model):
+    state = models.ForeignKey(State, on_delete=models.CASCADE)
+    name = models.CharField(max_length=60)
+    def __str__(self) -> str:
+        return self.name
+    
 
 class Languages(models.Model):
     employee = models.ForeignKey(Employee,on_delete=models.CASCADE, related_name='employee_language')
-    LEVEL_ADVANCED = 'L'
+    
+    LEVEL_ADVANCED = 'A'
     LEVEL_MEDIUM = 'M'
     LEVEL_INTRODUCTORY = 'I'
     SKILL_LEVEL = [
@@ -72,7 +87,7 @@ class Languages(models.Model):
         (LEVEL_INTRODUCTORY, 'Introductory')
     ]
     
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=10)
     skill_level = models.CharField(max_length=1, choices=SKILL_LEVEL)
 
 class EducationalBackground(models.Model):
@@ -160,5 +175,4 @@ class WorkExperience(models.Model):
         null=True, 
         blank=True)
     current_job = models.BooleanField()
-    none = models.BooleanField()
     achievements_and_main_tasks = models.CharField(max_length=1000)
