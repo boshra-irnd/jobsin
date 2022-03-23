@@ -1,7 +1,7 @@
 from dataclasses import fields
 from pyexpat import model
 from rest_framework import serializers
-from .models import (Employee, WorkExperience, Languages, SoftwareSkills, EducationalBackground, JobCategory)
+from .models import (Employee, WorkExperience, Languages, SoftwareSkills, EducationalBackground, JobCategory, State, City)
         
 class LanguagesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,7 +52,15 @@ class JobCategorySerializer(serializers.ModelSerializer):
         model = JobCategory
         fields = ['title']
         
-       
+class StateSerializer(serializers.Serializer):
+    class Meta:
+        models = State
+        fields = ['title']
+class CitySerializer(serializers.Serializer):
+    class Meta:
+        models = City
+        fields = ['title']   
+        
 class EmployeeSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(read_only=True)
     first_name = serializers.CharField(source = "user.first_name", read_only=True)
@@ -61,7 +69,9 @@ class EmployeeSerializer(serializers.ModelSerializer):
     employee_softwareskill = SoftwareSkillSerializer(many=True, read_only=True)
     employee_educationalbackground = EducationalBackgroundSerializer(many=True, read_only=True)
     employee_language = LanguagesSerializer(many=True, read_only=True)
-    
+    # Preferred_job_category = JobCategorySerializer(many=True, read_only=True)
+    state = StateSerializer(many=True, read_only=True)
+    city = CitySerializer(many=True, read_only=True)
     class Meta:
         model = Employee
         fields = ['user_id','id' ,'first_name','last_name', 'gender',

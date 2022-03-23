@@ -38,17 +38,17 @@ class Employee(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS)
     # address-id
-    phone_number = models.CharField(max_length=12, null=True)
-    date_of_birth = models.DateField()
-    expected_salary	= models.IntegerField()
+    phone_number = models.CharField(max_length=12, null=True, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    expected_salary	= models.IntegerField(null=True, blank=True)
     Preferred_job_category = models.ForeignKey(JobCategory, on_delete=models.CASCADE, null=True, blank=True)
     state = models.ForeignKey('State', on_delete=models.CASCADE, null=True, blank=True)
     city = models.ForeignKey('City', on_delete=models.CASCADE, null=True, blank=True)
-    zip_code = models.IntegerField()
+    zip_code = models.IntegerField(null=True, blank=True)
     # work experience-id 
     # languages-id = models.CharField(max_length=255)
     # software skills-id
-    linkedin_profile = models.CharField(max_length=255)
+    linkedin_profile = models.CharField(max_length=255, null=True, blank=True)
     
     def __str__(self) -> str:
         return self.user.first_name + ' ' + self.user.last_name
