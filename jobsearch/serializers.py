@@ -1,40 +1,60 @@
 from dataclasses import fields
 from pyexpat import model
+from unicodedata import category
 from rest_framework import serializers
-from .models import (Employee, WorkExperience, Languages, SoftwareSkills, EducationalBackground, JobCategory, State, City)
+from .models import (Employee, WorkExperience,LanguageTitle, Language,
+                     SoftwareSkill, EducationalBackground, JobCategory,
+                     State, City, SoftwareSkillCategory, SoftwareSkillTitle)
         
-class LanguagesSerializer(serializers.ModelSerializer):
+class LanguageSerializer(serializers.ModelSerializer):
+    languagetitle = serializers.StringRelatedField()
+    
     class Meta:
-        model = Languages
-        fields = ['employee_id', 'title', 'skill_level']
+        model = Language
+        fields = ['languagetitle', 'skill_level']
         
     def create(self, validated_data):
         employee_id = self.context['employee_id']
-        return Languages.objects.create(employee_id=employee_id,**validated_data)
+        return Language.objects.create(employee_id=employee_id,**validated_data)
     
  
 class WorkExperienceSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkExperience
         fields = ['job_title', 'job_category', 'seniority_level', 
-                  'company_name', 'country', 'city', 'from_month', 
+                  'company_name', 'state', 'city', 'from_month', 
                   'from_year', 'to_year', 'to_month', 'current_job', 
                   'achievements_and_main_tasks']
         
     def create(self, validated_data):
         employee_id = self.context['employee_id']
         return WorkExperience.objects.create(employee_id=employee_id,**validated_data)
- 
         
-class SoftwareSkillSerializer(serializers.ModelSerializer):
+
+class SoftwareSkillCategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = SoftwareSkills
-        fields = ['category', 'title', 'level']
+        model = SoftwareSkillCategory
+        fields = ['category_title']
+        
+        
+class SoftwareSkillTitleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SoftwareSkillTitle
+        fields = ['title', 'softwareskillcategory']
+        
+
+class SoftwareSkillSerializer(serializers.ModelSerializer):
+    softwareskillcategory = serializers.StringRelatedField()
+    title = serializers.StringRelatedField()
+    class Meta:
+        model = SoftwareSkill
+        fields = ['softwareskillcategory', 'title', 'skill_level']
         
     def create(self, validated_data):
         employee_id = self.context['employee_id']
-        return SoftwareSkills.objects.create(employee_id=employee_id,**validated_data)
- 
+        return SoftwareSkill.objects.create(employee_id=employee_id,**validated_data)
+
+
 class EducationalBackgroundSerializer(serializers.ModelSerializer):
     class Meta:
         model = EducationalBackground
@@ -68,10 +88,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
     employee_workexperience = WorkExperienceSerializer(many=True, read_only=True)
     employee_softwareskill = SoftwareSkillSerializer(many=True, read_only=True)
     employee_educationalbackground = EducationalBackgroundSerializer(many=True, read_only=True)
-    employee_language = LanguagesSerializer(many=True, read_only=True)
-    # Preferred_job_category = JobCategorySerializer(many=True, read_only=True)
-    state = StateSerializer(many=True, read_only=True)
-    city = CitySerializer(many=True, read_only=True)
+    employee_language = LanguageSerializer(many=True, read_only=True)
     class Meta:
         model = Employee
         fields = ['user_id','id' ,'first_name','last_name', 'gender',
@@ -80,3 +97,8 @@ class EmployeeSerializer(serializers.ModelSerializer):
                   'linkedin_profile', 'state', 'city', 'zip_code',
                   'employee_language','employee_workexperience',
                   'employee_softwareskill','employee_educationalbackground']
+        
+class LanguageTitleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LanguageTitle
+        fields = ['title']

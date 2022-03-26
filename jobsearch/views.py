@@ -3,25 +3,30 @@ from re import search
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 import urllib3
-from .models import (Employee, Languages, SoftwareSkills,
-                     WorkExperience, JobCategory, EducationalBackground)
+from .models import (Employee, Language, SoftwareSkill,WorkExperience,
+                     JobCategory, EducationalBackground, LanguageTitle, 
+                     SoftwareSkillTitle, SoftwareSkillCategory)
 from .serializers import (EmployeeSerializer, SoftwareSkillSerializer,
-                          LanguagesSerializer, EducationalBackgroundSerializer, 
-                          WorkExperienceSerializer, JobCategorySerializer)
-from rest_framework.permissions import AllowAny, DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly, IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
+                          LanguageSerializer, EducationalBackgroundSerializer, StateSerializer, 
+                          WorkExperienceSerializer, JobCategorySerializer,
+                          LanguageTitleSerializer, SoftwareSkillCategorySerializer,
+                          SoftwareSkillTitleSerializer)
+from rest_framework.permissions import (AllowAny, DjangoModelPermissions,
+                                        DjangoModelPermissionsOrAnonReadOnly,
+                                        IsAdminUser, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .permissions import IsAdminOrReadOnly, IsOwnUserOrReadOnly2, IsOwnUserOrReadOnly, IsOwnUserOrReadOnly3
+from .permissions import (IsAdminOrReadOnly, IsOwnUserOrReadOnly2, IsOwnUserOrReadOnly)
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .pagination import DefaultPagination
-from rest_framework import permissions
-import urllib
+
 # Create your views here.
 
 class EmployeeViewSet(ModelViewSet):
     http_method_names = ['get', 'put', 'patch', 'delete']
-    queryset = Employee.objects.all()
+    queryset = Employee.objects.select_related('user', 'Preferred_job_category', 'state', 'city').all()
     pagination_class = DefaultPagination
     serializer_class = EmployeeSerializer
     # permission_classes = [IsOwnUserOrReadOnly]
@@ -44,74 +49,38 @@ class EmployeeViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
-   
-# # jhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-# class CheckParentPermissionMixin:
-#     parent_queryset: Employee.objects.all()
-#     parent_lookup_field: 'id'
-#     parent_lookup_url_kwarg: 'id'
-
-#     def __init__(self, **kwargs):
-#         self.parent_obj: Any = None
-#         super().__init__(**kwargs)
-
-#     def check_permissions(self, request):
-#         super().check_permissions(request)
-
-#         # check permissions for the parent object
-#         parent_lookup_url_kwarg = self.parent_lookup_url_kwarg or self.parent_lookup_field
-#         filter_kwargs = {
-#             self.parent_lookup_field: kwargs[parent_lookup_url_kwarg]
-#         }
-#         self.parent_obj = get_object_or_404(self.parent_queryset, **filter_kwargs)
-#         self.parent_obj._is_parent_obj = True
-#         super().check_object_permissions(request, self.parent_obj)
 
 
-class SoftwareSkillViewset(CheckParentPermissionMixin,ModelViewSet):
+class SoftwareSkillViewset(ModelViewSet):
     serializer_class = SoftwareSkillSerializer
     permission_classes = [IsOwnUserOrReadOnly2]
-    # parent_queryset = Employee.objects.all()
-    # parent_lookup_field = 'id'
-    # parent_lookup_url_kwarg = 'id'
-    # lookup_field = 'id'
-    def dispatch(self, request, *args, **kwargs):
-        parent_view = EmployeeViewSet.as_view({'get':'retrieve'})
-        original_method = 'GET'
-        parent_kwargs = {'id':kwargs['employee_id']}
-        
-        parent_response = parent_view(request, *args, **parent_kwargs)
-        if parent_response.exception:
-            return parent_response
-        request.method = original_method
-        return super().dispatch(request, *args, **kwargs)    
-    
+
     def get_queryset(self):
-        return SoftwareSkills.objects.filter(employee_id=self.kwargs['employee_id'])
+        return SoftwareSkill.objects.filter(employee_id=self.kwargs['employee_id']).order_by('id').select_related('softwareskillcategory').select_related('title')
     
     def get_serializer_context(self):
         return {'employee_id': self.kwargs['employee_id']}
 
   
-class LanguagesViewSet(ModelViewSet):
-    serializer_class = LanguagesSerializer
-    permission_classes = [IsAdminOrReadOnly]
+class LanguageViewSet(ModelViewSet):
+    serializer_class = LanguageSerializer
     
     def get_queryset(self):
-        return Languages.objects.filter(employee_id=self.kwargs['employee_pk'])
+        return Language.objects.select_related('languagetitle').filter(employee_id=self.kwargs['employee_id'])
     
     def get_serializer_context(self):
-        return {'employee_id': self.kwargs['employee_pk']}
+        return {'employee_id': self.kwargs['employee_id']}
     
     
 class WorkExperienceViewSet(ModelViewSet):
     serializer_class = WorkExperienceSerializer
     
     def get_queryset(self):
-        return WorkExperience.objects.filter(employee_id=self.kwargs['employee_pk'])
+        return WorkExperience.objects.filter(employee_id=self.kwargs['employee_id']).select_related('state')
     
     def get_serializer_context(self):
-        return {'employee_id': self.kwargs['employee_pk']}
+        return {'employee_id': self.kwargs['employee_id']}
+
 
 class JobCategoryViewSet(ModelViewSet):
     queryset = JobCategory.objects.all()
@@ -120,12 +89,25 @@ class JobCategoryViewSet(ModelViewSet):
     
 
 class EducationalBackgroundViewSet(ModelViewSet):
-    permission_classes = [IsAdminUser]
     serializer_class = EducationalBackgroundSerializer
     
     def get_queryset(self):
-        return EducationalBackground.objects.filter(employee_id=self.kwargs['employee_pk'])
+        return EducationalBackground.objects.filter(employee_id=self.kwargs['employee_id'])
     
     def get_serializer_context(self):
-        return {'employee_id': self.kwargs['employee_pk']}
-  
+        return {'employee_id': self.kwargs['employee_id']}
+
+
+class LanguageTitleViewSet(ModelViewSet):
+    serializer_class = LanguageTitleSerializer
+    queryset = LanguageTitle.objects.all()
+    
+
+class SoftwareSkillTitleViewSet(ModelViewSet):
+    serializer_class = SoftwareSkillTitleSerializer
+    queryset = SoftwareSkillTitle.objects.all()
+
+
+class SoftwareSkillCategoryViewSet(ModelViewSet):
+    queryset = SoftwareSkillCategory.objects.all()
+    serializer_class = SoftwareSkillCategorySerializer
