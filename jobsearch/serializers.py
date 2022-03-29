@@ -1,14 +1,9 @@
-from dataclasses import fields
-from pyexpat import model
-from unicodedata import category
 from rest_framework import serializers
 from .models import (Employee, WorkExperience,LanguageTitle, Language,
                      SoftwareSkill, EducationalBackground, JobCategory,
                      State, City, SoftwareSkillCategory, SoftwareSkillTitle)
         
-class LanguageSerializer(serializers.ModelSerializer):
-    languagetitle = serializers.StringRelatedField()
-    
+class LanguageSerializer(serializers.ModelSerializer):    
     class Meta:
         model = Language
         fields = ['languagetitle', 'skill_level']
@@ -44,8 +39,6 @@ class SoftwareSkillTitleSerializer(serializers.ModelSerializer):
         
 
 class SoftwareSkillSerializer(serializers.ModelSerializer):
-    softwareskillcategory = serializers.StringRelatedField()
-    title = serializers.StringRelatedField()
     class Meta:
         model = SoftwareSkill
         fields = ['softwareskillcategory', 'title', 'skill_level']

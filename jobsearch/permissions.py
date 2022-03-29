@@ -1,7 +1,5 @@
-from operator import truediv
 from rest_framework import permissions
-
-from jobsearch.models import Employee
+from .models import Employee
 
 class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
