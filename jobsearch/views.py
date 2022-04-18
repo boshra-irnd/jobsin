@@ -20,12 +20,11 @@ from .models import (Employee, Language, SoftwareSkill,WorkExperience,
                      JobCategory, EducationalBackground, LanguageTitle, 
                      SoftwareSkillTitle, SoftwareSkillCategory)
 
-# Create your views here.
 
 class EmployeeViewSet(ModelViewSet):
     http_method_names = ['get', 'put', 'patch', 'delete', 'head', 'options']
-    lookup_url_kwarg = "id"
-    permission_classes = [IsOwnUserOrReadOnly]
+    # lookup_url_kwarg = "id"
+    permission_classes = [IsOwnUserOrReadOnly,IsAuthenticated]
     pagination_class = DefaultPagination
     serializer_class = EmployeeSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -39,8 +38,8 @@ class EmployeeViewSet(ModelViewSet):
     def get_queryset(self):
         return Employee.objects \
         .select_related('user', 'Preferred_job_category', 'state', 'city') \
-        .filter(id=self.request.user.employee.id)
-    
+        .filter()
+    # user__id=self.request.user.id
     # @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsOwnUserOrReadOnly])
     # def me(self, request):
     #     employee = Employee.objects.get(user_id=request.user.id)
@@ -177,3 +176,5 @@ class SoftwareSkillTitleViewSet(ModelViewSet):
 class SoftwareSkillCategoryViewSet(ModelViewSet):
     queryset = SoftwareSkillCategory.objects.all()
     serializer_class = SoftwareSkillCategorySerializer
+
+

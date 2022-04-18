@@ -11,7 +11,6 @@ from .views import (JobCategoryViewSet, EmployeeViewSet,
 router = routers.DefaultRouter()
 router.register(r'employee', EmployeeViewSet, basename='jobsearch')
 router.register(r'jobcategory', JobCategoryViewSet)
-
 employee_router = routers.NestedDefaultRouter(router, 'employee', lookup='employee')
 
 employee_router.register('languages', LanguageViewSet, basename='employee-language')

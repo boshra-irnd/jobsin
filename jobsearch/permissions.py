@@ -14,7 +14,7 @@ class IsOwnUserOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return bool(obj.user == request.user)
+        return bool(obj.user == request.user and obj.user.role == 'E')
     
 class IsOwnUserOrReadOnly2(permissions.BasePermission):
     message = 'Editing detail is rstricted to the author only.'

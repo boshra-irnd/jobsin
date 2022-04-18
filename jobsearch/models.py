@@ -8,13 +8,16 @@ from django.db import models
 from django.test import modify_settings
 from django.conf import settings
 from django.contrib import admin
+
 # Create your models here.
+
 
 class JobCategory(models.Model):
     title = models.CharField(max_length=255)
     
     def __str__(self) -> str:
         return self.title
+       
        
 class Employee(models.Model):
     GENDER_FEMALE = 'F'
@@ -48,7 +51,8 @@ class Employee(models.Model):
     # languages-id = models.CharField(max_length=255)
     # software skills-id
     linkedin_profile = models.CharField(max_length=255, null=True, blank=True)
-    
+
+
     def __str__(self) -> str:
         return self.user.first_name + ' ' + self.user.last_name
     
@@ -96,7 +100,7 @@ class LanguageTitle(models.Model):
     
 class Language(models.Model):
     employee = models.ForeignKey(Employee,on_delete=models.CASCADE, related_name='employee_language')
-    
+
     LEVEL_ADVANCED = 'A'
     LEVEL_MEDIUM = 'M'
     LEVEL_INTRODUCTORY = 'I'
@@ -238,3 +242,5 @@ class WorkExperience(models.Model):
     class Meta:
         ordering = ['job_title', 'job_category', 'seniority_level',
                     'company_name', 'state', 'city', 'current_job']
+
+

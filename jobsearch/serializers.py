@@ -75,7 +75,7 @@ class CitySerializer(serializers.Serializer):
         fields = ['title']   
         
 class EmployeeSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(read_only=True)
+    user_id = serializers.UUIDField(read_only=True)
     first_name = serializers.CharField(source = "user.first_name", read_only=True)
     last_name = serializers.CharField(source = "user.last_name", read_only=True)
     employee_workexperience = WorkExperienceSerializer(many=True, read_only=True)
@@ -95,3 +95,4 @@ class LanguageTitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = LanguageTitle
         fields = ['title']
+        
