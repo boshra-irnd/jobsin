@@ -9,25 +9,27 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     
 
 class IsOwnUserOrReadOnly(permissions.BasePermission):
-    message = 'Editing detail is rstricted to the author only.'
+    message = 'Editing detail is restricted to the author only.'
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return bool(obj.user == request.user and obj.user.role == 'S')
+
+
+class IsOwnUserOrReadOnlyEmployer(permissions.BasePermission):
+    message = 'Editing detail is restricted to the author only.'
 
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
         return bool(obj.user == request.user and obj.user.role == 'E')
-    
-class IsOwnUserOrReadOnly2(permissions.BasePermission):
-    message = 'Editing detail is rstricted to the author only.'
+
+
+class IsOwnUserOrReadOnlyEmployer2(permissions.BasePermission):
+    message = 'Editing detail is restricted to the author only.'
 
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return bool(obj.employee.user == request.user)
-    
-class IsOwnUserOrReadOnly3(permissions.BasePermission):
-    message = 'Editing detail is rstricted to the author only.'
-
-    def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return bool(obj.employee.user == request.user)
+        return bool(obj.employer.user == request.user and obj.employer.user.role == 'E')
