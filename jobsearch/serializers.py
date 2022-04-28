@@ -20,10 +20,21 @@ class WorkExperienceSerializer(serializers.ModelSerializer):
         
     def validate(self, data):
         dependent_cities = City.objects.filter(state=data['state'])
-        if data['city'] in dependent_cities:
-            return data
-        raise serializers.ValidationError(
-            'this city does not dependent to selected state')
+        if data['city'] not in dependent_cities:
+            raise serializers.ValidationError(
+                'this city does not dependent to selected state')
+        if data['from_year'] > data['to_year']:
+            raise serializers.ValidationError(
+            {"to_year": "finish must occur after start"})
+        elif data['from_year'] == data['to_year']:
+            if data['from_month'] >= data['to_month']:
+                raise serializers.ValidationError(
+                    {"to_month": "finish must occur after start"})
+        return data
+        
+      
+
+    
 
     
 
