@@ -389,3 +389,32 @@ class Language(models.Model):
                 name='not_both_null'
             )
         ]
+
+
+class Applicant(models.Model):
+    jobseeker = models.ForeignKey(JobSeeker, on_delete=models.CASCADE, null=True, blank=True)
+    cover_letter = models.TextField()
+    jobdetail = models.ForeignKey(JobDetail, on_delete=models.PROTECT, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    STATUS_PENDING = 'P'
+    STATUS_REJECTED = 'R'
+    STATUS_INTERVIEW = 'I'
+    STATUS_HIRE = 'H'
+    
+    APPLICANT_STATUS = (
+    (STATUS_PENDING, 'Pending'),
+    (STATUS_REJECTED, 'Rejected'),
+    (STATUS_INTERVIEW, 'Interview'),
+    (STATUS_HIRE, 'Hire'),
+    )
+    applicant_status = models.CharField(max_length=1, choices=APPLICANT_STATUS)
+    def __str__(self):
+        return str(f'{self.jobseeker.first_name} applied to {self.jobdetail.job_title}')
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=Q(jobseeker__isnull=False) | Q(jobdetail__isnull=False),
+                name='not_both_null3'
+            )
+        ]

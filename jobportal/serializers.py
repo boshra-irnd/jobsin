@@ -3,7 +3,8 @@ from rest_framework.validators import ValidationError
 from .models import (JobSeeker, WorkExperience,LanguageTitle, Language,
                      SoftwareSkill, EducationalBackground, JobCategory,
                      State, City, SoftwareSkillCategory, SoftwareSkillTitle,
-                     Employer, BasicInformationOfOrganization, JobDetail, FieldOfStudy)
+                     Employer, BasicInformationOfOrganization, JobDetail,
+                     FieldOfStudy, Applicant)
         
  
 class WorkExperienceSerializer(serializers.ModelSerializer):
@@ -251,4 +252,22 @@ class FieldOfStudySerializer(serializers.ModelSerializer):
         model = FieldOfStudy
         fields = ['title']
         
+class JobSeekerApplicantSerializer(serializers.ModelSerializer):
+    applicant_status = serializers.CharField(read_only=True)
+    class Meta:
+        model = Applicant
+        fields = ['cover_letter', 'jobdetail', 'created', 'applicant_status']
+        
+    def create(self, validated_data):
+        jobseeker_id = self.context['jobseeker_id']
+        return Applicant.objects.create(jobseeker_id=jobseeker_id,**validated_data)
+
+class EmployerApplicantSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    jobdetail = JobDetailSerializer(read_only=True)
+    jobseeker = JobSeekerSerializer(read_only=True)
+    cover_letter = serializers.CharField(read_only=True)
+    class Meta:
+        model = Applicant
+        fields = ['id', 'jobseeker', 'cover_letter', 'jobdetail', 'created', 'applicant_status']
         

@@ -6,7 +6,8 @@ from .views import (JobCategoryViewSet, JobSeekerViewSet,JobSeekerLanguageViewSe
                     EducationalBackgroundViewSet, EmployerViewSet,JobSeekerSoftwareSkillViewSet, 
                     BasicInformationOfOrganizationViewSet,JobDetailViewSet,FieldOfStudyViewSet,
                     WorkExperienceViewSet, EmployerLanguageViewSet,JobDetailAllUserViewSet,
-                    BasicInformationOfOrganizationAllUserViewSet, EmployerSoftwareSkillViewSet) 
+                    BasicInformationOfOrganizationAllUserViewSet, EmployerSoftwareSkillViewSet,
+                    ApplicantViewSet, EmployerApplicantViewSet) 
 
 
 
@@ -22,12 +23,14 @@ employer_router.register('jobdetail', JobDetailViewSet, basename='jobdetail')
 employer_router.register('jd_language', EmployerLanguageViewSet, basename='jd_language')
 employer_router.register('basicinformation', BasicInformationOfOrganizationViewSet, basename='basicinformation')
 employer_router.register('jd_softwareskill', EmployerSoftwareSkillViewSet, basename='jd_softwareskill')
+employer_router.register('jd_applicant', EmployerApplicantViewSet, basename='jd_softwareskill')
 
 jobseeker_router = routers.NestedDefaultRouter(router, 'jobseeker', lookup='jobseeker')
 jobseeker_router.register('languages', JobSeekerLanguageViewSet, basename='jobseeker-language')
 jobseeker_router.register('educationalbackground', EducationalBackgroundViewSet, basename='jobseeker-educationalbackground')
 jobseeker_router.register('workexperience', WorkExperienceViewSet, basename='jobseeker-workexperience')
 jobseeker_router.register('softwareskill', JobSeekerSoftwareSkillViewSet, basename='jobseeker-softwareskill')
+jobseeker_router.register('applicant', ApplicantViewSet, basename='jobseeker-applicant')
 
 
 

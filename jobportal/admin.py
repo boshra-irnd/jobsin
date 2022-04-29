@@ -4,7 +4,7 @@ from .models import (JobSeeker, LanguageTitle, WorkExperience,
                      Language, SoftwareSkill, City, State, 
                      SoftwareSkillCategory, SoftwareSkillTitle,
                      Employer, BasicInformationOfOrganization,
-                     FieldOfStudy, JobDetail, JobCategory)
+                     FieldOfStudy, JobDetail, JobCategory, Applicant)
 from django.db.models.aggregates import Count
 # Register your models here.
 
@@ -126,4 +126,10 @@ class JobDetailAdmin(admin.ModelAdmin):
 @admin.register(JobCategory)
 class JobCategoryAdmin(admin.ModelAdmin):
     list_display = ['title']
+    list_per_page = 10      
+    
+      
+@admin.register(Applicant)
+class ApplicantAdmin(admin.ModelAdmin):
+    list_display = ['jobseeker', 'cover_letter', 'jobdetail', 'created', 'applicant_status']
     list_per_page = 10        

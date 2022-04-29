@@ -19,12 +19,13 @@ from .serializers import (JobSeekerSerializer, JobSeekerSoftwareSkillSerializer,
                           LanguageTitleSerializer, SoftwareSkillCategorySerializer,
                           SoftwareSkillTitleSerializer, EmployerSerializer, 
                           BasicInformationOfOrganizationSerializer, FieldOfStudySerializer, 
-                          JobDetailSerializer, EmployerLanguageSerializer, 
-                          JobDetailAllUserSerializer, EmployerSoftwareSkillSerializer)
+                          JobDetailSerializer, EmployerLanguageSerializer, JobSeekerApplicantSerializer,
+                          JobDetailAllUserSerializer, EmployerSoftwareSkillSerializer, EmployerApplicantSerializer)
 from .models import (JobSeeker, Language, SoftwareSkill,WorkExperience,
                      JobCategory, EducationalBackground, LanguageTitle, 
                      SoftwareSkillTitle, SoftwareSkillCategory, Employer, 
-                     BasicInformationOfOrganization, FieldOfStudy, JobDetail)
+                     BasicInformationOfOrganization, FieldOfStudy,
+                     JobDetail, Applicant)
 
 
 class JobSeekerViewSet(ModelViewSet):
@@ -258,3 +259,29 @@ class EmployerSoftwareSkillViewSet(ModelViewSet):
     
     def get_serializer_context(self):
         return {'employer_id': self.request.user.employer.id}
+
+class ApplicantViewSet(ModelViewSet):
+    serializer_class = JobSeekerApplicantSerializer
+    
+    def get_queryset(self):
+        return Applicant.objects \
+            .select_related('jobseeker', 'jobdetail') \
+            .filter(jobseeker__user_id=self.request.user.id)
+            
+    def get_serializer_context(self):
+        return {'jobseeker_id': self.request.user.jobseeker.id}
+
+
+class EmployerApplicantViewSet(ModelViewSet):
+    http_method_names = ['get', 'put', 'patch', 'head', 'options']
+    
+    serializer_class = EmployerApplicantSerializer
+    
+    def get_queryset(self):
+        return Applicant.objects \
+            .select_related('jobseeker', 'jobdetail') \
+            .filter(jobdetail__employer__user_id=self.request.user.id)
+            
+    def get_serializer_context(self):
+        return {'jobdetail_id': self.request.user.employer.jobdetail_set}
+
