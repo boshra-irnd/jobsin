@@ -200,7 +200,7 @@ class JobDetailViewSet(ModelViewSet):
 class JobDetailAllUserViewSet(ModelViewSet):
     http_method_names = ['get']
     queryset = JobDetail.objects.all() \
-        .select_related('employer', 'field_of_Study', 'softwareskill')
+        .select_related('employer', 'field_of_Study')
     serializer_class = JobDetailAllUserSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     ordering_fields = [
@@ -245,7 +245,7 @@ class EmployerLanguageViewSet(ModelViewSet):
             .filter(jobdetail__employer__user_id=self.request.user.employer.id)
 
     def get_serializer_context(self):
-        return {'employer_pk': self.kwargs['employer_pk']}
+        return {'employer_id': self.kwargs['employer_pk']}
  
  
 class EmployerSoftwareSkillViewSet(ModelViewSet):
@@ -254,7 +254,7 @@ class EmployerSoftwareSkillViewSet(ModelViewSet):
     def get_queryset(self):
         return SoftwareSkill.objects \
             .filter(jobdetail__employer__user_id=self.request.user.employer.id) \
-            .order_by('id').select_related('softwareskillcategory','title','jobdetail')
+            .order_by('id').select_related('softwareskillcategory' ,'title' ,'jobdetail')
     
     def get_serializer_context(self):
         return {'employer_id': self.request.user.employer.id}

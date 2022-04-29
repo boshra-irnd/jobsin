@@ -159,28 +159,6 @@ class BasicInformationOfOrganizationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'this city does not dependent to selected state')
         return data
-        
-class JobDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = JobDetail
-        fields = ['employer_id', 'job_title', 'organizational_category', 'type_of_cooperation', 
-                  'priority_with_residents_in_the_city_of_work', 'possibility_of_telecommuting', 
-                  'field_of_individual_activity', 'field_of_activity_of_the_organization', 
-                  'working_hoursand_days' ,'business_trips_in_this_job', 'minimum_age', 
-                  'maximum_age', 'gender', 'attract_an_intern', 'attracting_the_disabled', 
-                  'completion_of_military_service', 'the_amount_of_work_experience', 'field_of_Study',
-                  'degree_level', 'salary', 'facilities_and_benefits', 'job_description']
-        
-    def create(self, validated_data):
-        employer_id = self.context['employer_pk']
-        return JobDetail.objects.create(employer_id=employer_id,**validated_data)
-    
-    def validate(self, data):
-        if data['maximum_age'] > data['minimum_age']:
-            return data
-        raise serializers.ValidationError(
-            'maximum age must be greather than minimum age')
-
   
 class EmployerLanguageSerializer(serializers.ModelSerializer):
 
@@ -189,7 +167,7 @@ class EmployerLanguageSerializer(serializers.ModelSerializer):
         fields = ['jobdetail', 'languagetitle', 'skill_level']
         
     def create(self, validated_data):
-        employer_id = self.context['employer_pk']
+        employer_id = self.context['employer_id']
         return Language.objects.create(employer_id=employer_id,**validated_data)
 
 
@@ -200,9 +178,34 @@ class EmployerSoftwareSkillSerializer(serializers.ModelSerializer):
         fields = ['jobdetail', 'softwareskillcategory', 'title', 'skill_level']
         
     def create(self, validated_data):
-        employer_id = self.context['employer_pk']
-        return Language.objects.create(employer_id=employer_id,**validated_data)
+        employer_id = self.context['employer_id']
+        return SoftwareSkill.objects.create(employer_id=employer_id,**validated_data)
  
+        
+class JobDetailSerializer(serializers.ModelSerializer):
+    jobdetail_language = EmployerLanguageSerializer(read_only=True, many=True)
+    jobdetail_softwareskill = EmployerSoftwareSkillSerializer(read_only=True, many=True)
+    class Meta:
+        model = JobDetail
+        fields = ['employer_id', 'job_title', 'organizational_category', 'type_of_cooperation', 
+                  'priority_with_residents_in_the_city_of_work', 'possibility_of_telecommuting', 
+                  'field_of_individual_activity', 'field_of_activity_of_the_organization', 
+                  'working_hoursand_days' ,'business_trips_in_this_job', 'minimum_age', 
+                  'maximum_age', 'gender', 'attract_an_intern', 'attracting_the_disabled', 
+                  'completion_of_military_service', 'the_amount_of_work_experience',
+                  'field_of_Study', 'degree_level', 'salary', 'facilities_and_benefits',
+                  'job_description', 'jobdetail_language', 'jobdetail_softwareskill']
+        
+    def create(self, validated_data):
+        employer_id = self.context['employer_id']
+        return JobDetail.objects.create(employer_id=employer_id,**validated_data)
+    
+    def validate(self, data):
+        if data['maximum_age'] > data['minimum_age']:
+            return data
+        raise serializers.ValidationError(
+            'maximum age must be greather than minimum age')
+
 
     
 class EmployerSerializer(serializers.ModelSerializer):
@@ -218,6 +221,8 @@ class EmployerSerializer(serializers.ModelSerializer):
 
 
 class JobDetailAllUserSerializer(serializers.ModelSerializer):
+    jobdetail_language = EmployerLanguageSerializer(read_only=True, many=True)
+    jobdetail_softwareskill = EmployerSoftwareSkillSerializer(read_only=True, many=True)
     class Meta:
         model = JobDetail
         fields = ['job_title', 'organizational_category', 'type_of_cooperation', 
@@ -227,7 +232,7 @@ class JobDetailAllUserSerializer(serializers.ModelSerializer):
                   'maximum_age', 'gender', 'attract_an_intern', 'attracting_the_disabled', 
                   'completion_of_military_service', 'the_amount_of_work_experience',
                   'field_of_Study', 'degree_level', 'salary', 'facilities_and_benefits',
-                  'job_description', 'jobdetail_language']
+                  'job_description', 'jobdetail_language', 'jobdetail_softwareskill']
         
 
         

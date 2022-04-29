@@ -170,32 +170,6 @@ class SoftwareSkillTitle(models.Model):
         ordering = ['id']
 
 
-class SoftwareSkill(models.Model):
-    jobseeker = models.ForeignKey(JobSeeker,on_delete=models.CASCADE, related_name='jobseeker_softwareskill', null=True, blank=True)
-    jobdetail = models.ForeignKey('JobDetail',on_delete=models.PROTECT, related_name='jobdetail_softwareskill', null=True, blank=True)
-    LEVEL_ADVANCED = 'L'
-    LEVEL_MEDIUM = 'M'
-    LEVEL_INTRODUCTORY = 'I'
-    
-    SKILL_LEVEL = [
-        (LEVEL_ADVANCED, 'Advanced'),
-        (LEVEL_MEDIUM, 'Medium'),
-        (LEVEL_INTRODUCTORY, 'Introductory')
-    ]
-    
-    softwareskillcategory = models.ForeignKey(SoftwareSkillCategory, on_delete=models.PROTECT)
-    title = models.ForeignKey(SoftwareSkillTitle, on_delete=models.PROTECT)
-    skill_level = models.CharField(max_length=1, choices=SKILL_LEVEL)
-
-    class Meta:
-        ordering = ['title', 'skill_level', 'softwareskillcategory']
-        constraints = [
-            models.CheckConstraint(
-                check=Q(jobseeker__isnull=False) | Q(jobdetail__isnull=False),
-                name='not_both_null2'
-            )
-        ]
-
 
 class WorkExperience(models.Model):
     YEAR_CHOICES = [(y,y) for y in range(1968, datetime.now().year)]
@@ -357,11 +331,41 @@ class JobDetail(models.Model):
         index_together = [
             ['minimum_age', 'maximum_age'],
             ]
-
     
+
+class SoftwareSkill(models.Model):
+    jobseeker = models.ForeignKey(JobSeeker,on_delete=models.CASCADE, related_name='jobseeker_softwareskill', null=True, blank=True)
+    jobdetail = models.ForeignKey(JobDetail,on_delete=models.PROTECT, related_name='jobdetail_softwareskill', null=True, blank=True)
+    employer = models.ForeignKey(Employer, on_delete=models.PROTECT, related_name='employer_softwareskill', null=True, blank=True)
+    
+    LEVEL_ADVANCED = 'L'
+    LEVEL_MEDIUM = 'M'
+    LEVEL_INTRODUCTORY = 'I'
+    
+    SKILL_LEVEL = [
+        (LEVEL_ADVANCED, 'Advanced'),
+        (LEVEL_MEDIUM, 'Medium'),
+        (LEVEL_INTRODUCTORY, 'Introductory')
+    ]
+    
+    softwareskillcategory = models.ForeignKey(SoftwareSkillCategory, on_delete=models.PROTECT)
+    title = models.ForeignKey(SoftwareSkillTitle, on_delete=models.PROTECT)
+    skill_level = models.CharField(max_length=1, choices=SKILL_LEVEL)
+
+    class Meta:
+        ordering = ['title', 'skill_level', 'softwareskillcategory']
+        constraints = [
+            models.CheckConstraint(
+                check=Q(jobseeker__isnull=False) | Q(jobdetail__isnull=False),
+                name='not_both_null2'
+            )
+        ]
+        
+        
 class Language(models.Model):
     jobseeker = models.ForeignKey(JobSeeker,on_delete=models.CASCADE, related_name='jobseeker_language', null=True, blank=True)
     jobdetail = models.ForeignKey(JobDetail,on_delete=models.PROTECT, related_name='jobdetail_language', null=True, blank=True)
+    employer = models.ForeignKey(Employer, on_delete=models.PROTECT, related_name='employer_language', null=True, blank=True)
     LEVEL_ADVANCED = 'A'
     LEVEL_MEDIUM = 'M'
     LEVEL_INTRODUCTORY = 'I'

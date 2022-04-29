@@ -55,7 +55,13 @@ class SoftwareSkillsAdmin(admin.ModelAdmin):
     list_display = ['softwareskillcategory', 'title', 'skill_level']
     list_per_page = 10
     
-
+    
+@admin.register(SoftwareSkillTitle)
+class SoftwareSkillsTitleAdmin(admin.ModelAdmin):
+    list_display = ['softwareskillcategory', 'title']
+    list_per_page = 10
+    
+    
 @admin.register(LanguageTitle)
 class LanguageTitleAdmin(admin.ModelAdmin):
     list_display = ['title']
