@@ -59,7 +59,11 @@ class JobSeekerSoftwareSkillSerializer(serializers.ModelSerializer):
         jobseeker_id = self.context['jobseeker_id']
         return SoftwareSkill.objects.create(jobseeker_id=jobseeker_id,**validated_data)
 
-
+    def create(self, validated_data):
+        employer_id = self.context['employer_id']
+        return SoftwareSkill.objects.create(employer_id=employer_id,**validated_data)
+ 
+ 
 class EducationalBackgroundSerializer(serializers.ModelSerializer):
     class Meta:
         model = EducationalBackground
@@ -181,7 +185,13 @@ class EmployerSoftwareSkillSerializer(serializers.ModelSerializer):
         employer_id = self.context['employer_id']
         return SoftwareSkill.objects.create(employer_id=employer_id,**validated_data)
  
-        
+    def validate(self, data):
+        dependent_skills = SoftwareSkillTitle.objects.filter(softwareskillcategory=data['softwareskillcategory'])
+        if data['title'] not in dependent_skills :
+            raise serializers.ValidationError(
+                {'title':f'{data["title"]} does not dependent to {data["softwareskillcategory"]}'})
+        return data
+    
 class JobDetailSerializer(serializers.ModelSerializer):
     jobdetail_language = EmployerLanguageSerializer(read_only=True, many=True)
     jobdetail_softwareskill = EmployerSoftwareSkillSerializer(read_only=True, many=True)
