@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # my apps
-    'jobsearch',
+    'jobportal',
     'core',
     # third party apps
     'rest_framework',

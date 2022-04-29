@@ -1,9 +1,9 @@
 from django.apps import AppConfig
 
 
-class JobsearchConfig(AppConfig):
+class JobportalConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'jobsearch'
+    name = 'jobportal'
     
     def ready(self) -> None:
-        import jobsearch.signals
+        import jobportal.signals

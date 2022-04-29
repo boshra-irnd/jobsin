@@ -5,10 +5,10 @@ from uuid import uuid4
 
 class User(AbstractUser):
     ROLE_JOB_SEEKER = 'S'
-    ROLE_EMPLOYEER = 'E'
+    ROLE_EMPLOYER = 'E'
     ROLE_CHOICES = [
         (ROLE_JOB_SEEKER, 'Job seeker'),
-        (ROLE_EMPLOYEER, 'Employeer')
+        (ROLE_EMPLOYER, 'Employer')
     ]
     
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)

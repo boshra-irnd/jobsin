@@ -19,7 +19,7 @@ class JobCategory(models.Model):
         return self.title
        
        
-class Employee(models.Model):
+class JobSeeker(models.Model):
     GENDER_FEMALE = 'F'
     GENDER_MALE = 'M'
     GENDER_CHOICES = [
@@ -50,7 +50,7 @@ class Employee(models.Model):
     # work experience-id 
     # languages-id = models.CharField(max_length=255)
     # software skills-id
-    linkedin_profile = models.CharField(max_length=255, null=True, blank=True)
+    linkedin_profile = models.CharField(max_length=255, null=True, blank=True, help_text='for example linkedin.com/in/username')
 
 
     def __str__(self) -> str:
@@ -116,7 +116,7 @@ class EducationalBackground(models.Model):
     YEAR_CHOICES = [(y,y) for y in range(1968, datetime.now().year)]
     MONTH_CHOICES = [(m,m) for m in range(1,13)]
     
-    employee = models.ForeignKey(Employee,on_delete=models.CASCADE, related_name='employee_educationalbackground')
+    jobseeker = models.ForeignKey(JobSeeker,on_delete=models.CASCADE, related_name='jobseeker_educationalbackground')
     degree_level = models.CharField(max_length=2, choices=DEGREE_LEVEL)
     field_of_Study = models.ForeignKey('FieldOfStudy', on_delete=models.CASCADE)
     university = models.CharField(max_length=255)
@@ -171,7 +171,7 @@ class SoftwareSkillTitle(models.Model):
 
 
 class SoftwareSkill(models.Model):
-    employee = models.ForeignKey(Employee,on_delete=models.CASCADE, related_name='employee_softwareskill', null=True, blank=True)
+    jobseeker = models.ForeignKey(JobSeeker,on_delete=models.CASCADE, related_name='jobseeker_softwareskill', null=True, blank=True)
     jobdetail = models.ForeignKey('JobDetail',on_delete=models.PROTECT, related_name='jobdetail_softwareskill', null=True, blank=True)
     LEVEL_ADVANCED = 'L'
     LEVEL_MEDIUM = 'M'
@@ -189,13 +189,19 @@ class SoftwareSkill(models.Model):
 
     class Meta:
         ordering = ['title', 'skill_level', 'softwareskillcategory']
+        constraints = [
+            models.CheckConstraint(
+                check=Q(jobseeker__isnull=False) | Q(jobdetail__isnull=False),
+                name='not_both_null2'
+            )
+        ]
 
 
 class WorkExperience(models.Model):
     YEAR_CHOICES = [(y,y) for y in range(1968, datetime.now().year)]
     MONTH_CHOICES = [(m,m) for m in range(1,13)]
     
-    employee = models.ForeignKey(Employee,on_delete=models.CASCADE, related_name='employee_workexperience')
+    jobseeker = models.ForeignKey(JobSeeker,on_delete=models.CASCADE, related_name='jobseeker_workexperience')
     job_title = models.CharField(max_length=255)
     job_category = models.CharField(max_length=255)
     seniority_level = models.CharField(max_length=255)
@@ -232,7 +238,7 @@ class WorkExperience(models.Model):
 
 
 # -----------------------------------------------------------
-# karfarma
+# Employer
 
 
 class Employer(models.Model):
@@ -240,6 +246,7 @@ class Employer(models.Model):
     phone_number = models.CharField(max_length=11)
     organization_level = models.CharField(max_length=55)
     direct_corporate_phone_number = models.CharField(max_length=10)
+    
     
 class BasicInformationOfOrganization(models.Model):
     employer = models.OneToOneField(Employer, on_delete=models.PROTECT)
@@ -342,16 +349,18 @@ class JobDetail(models.Model):
     salary = models.CharField(max_length=6, choices=SALARY_CHOICES)
     facilities_and_benefits = models.CharField(max_length=255, null=True, blank=True)
     job_description = models.TextField(null=True, blank=True)
+    
     def __str__(self):
         return (self.job_title) + ' | ' + (self.job_description[0:10])
     
-        
-
-
+    class Meta:
+        index_together = [
+            ['minimum_age', 'maximum_age'],
+            ]
 
     
 class Language(models.Model):
-    employee = models.ForeignKey(Employee,on_delete=models.CASCADE, related_name='employee_language', null=True, blank=True)
+    jobseeker = models.ForeignKey(JobSeeker,on_delete=models.CASCADE, related_name='jobseeker_language', null=True, blank=True)
     jobdetail = models.ForeignKey(JobDetail,on_delete=models.PROTECT, related_name='jobdetail_language', null=True, blank=True)
     LEVEL_ADVANCED = 'A'
     LEVEL_MEDIUM = 'M'
@@ -372,7 +381,7 @@ class Language(models.Model):
         ordering = ['languagetitle', 'skill_level']
         constraints = [
             models.CheckConstraint(
-                check=Q(employee__isnull=False) | Q(jobdetail__isnull=False),
+                check=Q(jobseeker__isnull=False) | Q(jobdetail__isnull=False),
                 name='not_both_null'
             )
         ]

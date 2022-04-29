@@ -1,6 +1,6 @@
 from unicodedata import category
 from django.contrib import admin
-from .models import (Employee, LanguageTitle, WorkExperience,
+from .models import (JobSeeker, LanguageTitle, WorkExperience,
                      Language, SoftwareSkill, City, State, 
                      SoftwareSkillCategory, SoftwareSkillTitle,
                      Employer, BasicInformationOfOrganization,
@@ -13,8 +13,8 @@ admin.site.site_header = 'Jobsin Admin'
 admin.site.index_title = 'Admin'
 
 
-@admin.register(Employee)
-class EmployeeAdmin(admin.ModelAdmin):
+@admin.register(JobSeeker)
+class JobSeekerAdmin(admin.ModelAdmin):
     list_display = ['first_name', 'last_name', 'gender', 'marital_status', 'phone_number', 
                     'date_of_birth', 'expected_salary', 'Preferred_job_category', 
                     'linkedin_profile']
@@ -35,7 +35,7 @@ class StateAdmin(admin.ModelAdmin):
     
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
-    list_display = ['name', 'state_name', 'employee_count']
+    list_display = ['name', 'state_name', 'jobseeker_count']
     list_per_page = 10
     list_select_related = ['state']
 
@@ -43,11 +43,11 @@ class CityAdmin(admin.ModelAdmin):
         return city.state.name    
     
     def get_queryset(self, request):
-        return super().get_queryset(request).annotate(employee_count=Count('employee'))
+        return super().get_queryset(request).annotate(jobseeker_count=Count('jobseeker'))
     
-    @admin.display(ordering='employee_count')
-    def employee_count(self, city):
-        return city.employee_count
+    @admin.display(ordering='jobseeker_count')
+    def jobseeker_count(self, city):
+        return city.jobseeker_count
     
     
 @admin.register(SoftwareSkill)

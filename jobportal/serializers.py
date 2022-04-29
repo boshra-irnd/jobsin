@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import ValidationError
-from .models import (Employee, WorkExperience,LanguageTitle, Language,
+from .models import (JobSeeker, WorkExperience,LanguageTitle, Language,
                      SoftwareSkill, EducationalBackground, JobCategory,
                      State, City, SoftwareSkillCategory, SoftwareSkillTitle,
                      Employer, BasicInformationOfOrganization, JobDetail, FieldOfStudy)
@@ -15,8 +15,8 @@ class WorkExperienceSerializer(serializers.ModelSerializer):
                   'achievements_and_main_tasks']
         
     def create(self, validated_data):
-        employee_id = self.context['employee_id']
-        return WorkExperience.objects.create(employee_id=employee_id,**validated_data)
+        jobseeker_id = self.context['jobseeker_id']
+        return WorkExperience.objects.create(jobseeker_id=jobseeker_id,**validated_data)
         
     def validate(self, data):
         dependent_cities = City.objects.filter(state=data['state'])
@@ -50,14 +50,14 @@ class SoftwareSkillTitleSerializer(serializers.ModelSerializer):
         fields = ['title', 'softwareskillcategory']
         
 
-class EmployeeSoftwareSkillSerializer(serializers.ModelSerializer):
+class JobSeekerSoftwareSkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = SoftwareSkill
         fields = ['softwareskillcategory', 'title', 'skill_level']
         
     def create(self, validated_data):
-        employee_id = self.context['employee_id']
-        return SoftwareSkill.objects.create(employee_id=employee_id,**validated_data)
+        jobseeker_id = self.context['jobseeker_id']
+        return SoftwareSkill.objects.create(jobseeker_id=jobseeker_id,**validated_data)
 
 
 class EducationalBackgroundSerializer(serializers.ModelSerializer):
@@ -68,8 +68,18 @@ class EducationalBackgroundSerializer(serializers.ModelSerializer):
                   'to_year', 'to_month', 'studying']
     
     def create(self, validated_data):
-        employee_id = self.context['employee_id']
-        return EducationalBackground.objects.create(employee_id=employee_id,**validated_data)
+        jobseeker_id = self.context['jobseeker_id']
+        return EducationalBackground.objects.create(jobseeker_id=jobseeker_id,**validated_data)
+    
+    def validate(self, data):
+        if data['from_year'] > data['to_year']:
+            raise serializers.ValidationError(
+            {"to_year": "finish must occur after start"})
+        elif data['from_year'] == data['to_year']:
+            if data['from_month'] >= data['to_month']:
+                raise serializers.ValidationError(
+                    {"to_month": "finish must occur after start"})
+        return data
     
         
 class JobCategorySerializer(serializers.ModelSerializer):
@@ -102,27 +112,34 @@ class JobSeekerLanguageSerializer(serializers.ModelSerializer):
         fields = ['languagetitle', 'skill_level']
         
     def create(self, validated_data):
-        employee_id = self.context['employee_id']
-        return Language.objects.create(employee_id=employee_id,**validated_data)
+        jobseeker_id = self.context['jobseeker_id']
+        return Language.objects.create(jobseeker_id=jobseeker_id,**validated_data)
     
-class EmployeeSerializer(serializers.ModelSerializer):
+class JobSeekerSerializer(serializers.ModelSerializer):
     user_id = serializers.UUIDField(read_only=True)
     first_name = serializers.CharField(source = "user.first_name", read_only=True)
     last_name = serializers.CharField(source = "user.last_name", read_only=True)
-    employee_workexperience = WorkExperienceSerializer(many=True, read_only=True)
-    employee_softwareskill = EmployeeSoftwareSkillSerializer(many=True, read_only=True)
-    employee_educationalbackground = EducationalBackgroundSerializer(many=True, read_only=True)
-    employee_language = JobSeekerLanguageSerializer(many=True, read_only=True)
+    jobseeker_workexperience = WorkExperienceSerializer(many=True, read_only=True)
+    jobseeker_softwareskill = JobSeekerSoftwareSkillSerializer(many=True, read_only=True)
+    jobseeker_educationalbackground = EducationalBackgroundSerializer(many=True, read_only=True)
+    jobseeker_language = JobSeekerLanguageSerializer(many=True, read_only=True)
     class Meta:
-        model = Employee
+        model = JobSeeker
         fields = ['user_id','id' ,'first_name','last_name', 'gender',
                   'marital_status', 'phone_number', 'date_of_birth',
                   'expected_salary','Preferred_job_category', 
                   'linkedin_profile', 'state', 'city', 'zip_code',
-                  'employee_language','employee_workexperience',
-                  'employee_softwareskill','employee_educationalbackground']
+                  'jobseeker_language','jobseeker_workexperience',
+                  'jobseeker_softwareskill','jobseeker_educationalbackground']
         
-        
+    
+    def validate(self, data):
+        dependent_cities = City.objects.filter(state=data['state'])
+        if data['city'] not in dependent_cities:
+            raise serializers.ValidationError(
+                'this city does not dependent to selected state')
+        return data
+    
 class BasicInformationOfOrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = BasicInformationOfOrganization
@@ -136,7 +153,12 @@ class BasicInformationOfOrganizationSerializer(serializers.ModelSerializer):
         employer_id = self.context['employer_id']
         return BasicInformationOfOrganization.objects.create(employer_id=employer_id,**validated_data)
     
-
+    def validate(self, data):
+        dependent_cities = City.objects.filter(state=data['state'])
+        if data['city'] not in dependent_cities:
+            raise serializers.ValidationError(
+                'this city does not dependent to selected state')
+        return data
         
 class JobDetailSerializer(serializers.ModelSerializer):
     class Meta:
