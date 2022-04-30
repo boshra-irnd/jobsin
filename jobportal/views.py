@@ -19,8 +19,10 @@ from .serializers import (JobSeekerSerializer, JobSeekerSoftwareSkillSerializer,
                           LanguageTitleSerializer, SoftwareSkillCategorySerializer,
                           SoftwareSkillTitleSerializer, EmployerSerializer, 
                           BasicInformationOfOrganizationSerializer, FieldOfStudySerializer, 
-                          JobDetailSerializer, EmployerLanguageSerializer, JobSeekerApplicantSerializer,
-                          JobDetailAllUserSerializer, EmployerSoftwareSkillSerializer, EmployerApplicantSerializer)
+                          JobDetailSerializer, EmployerLanguageSerializer,
+                          JobSeekerApplicantSerializer, JobDetailAllUserSerializer,
+                          EmployerSoftwareSkillSerializer, EmployerApplicantSerializer,
+                          EmployerEducationalBackgroundSerializer)
 from .models import (JobSeeker, Language, SoftwareSkill,WorkExperience,
                      JobCategory, EducationalBackground, LanguageTitle, 
                      SoftwareSkillTitle, SoftwareSkillCategory, Employer, 
@@ -67,7 +69,7 @@ class JobSeekerSoftwareSkillViewSet(ModelViewSet):
     def get_queryset(self):
         return SoftwareSkill.objects \
             .filter(jobseeker__user_id=self.request.user.jobseeker.id) \
-            .order_by('id').select_related('jobseeker','softwareskillcategory','title')
+            .order_by('id').select_related('softwareskillcategory' ,'title', 'jobdetail', 'jobseeker', 'employer')
     
     def get_serializer_context(self):
         return {'jobseeker_id': self.request.user.jobseeker.id}
@@ -92,7 +94,7 @@ class JobSeekerLanguageViewSet(ModelViewSet):
 
     
     def get_queryset(self):
-        return Language.objects.select_related('languagetitle','jobseeker') \
+        return Language.objects.select_related('languagetitle', 'jobdetail', 'jobseeker', 'employer') \
             .filter(jobseeker__user_id=self.request.user.jobseeker.id)
 
     def get_serializer_context(self):
@@ -179,6 +181,7 @@ class EmployerViewSet(ModelViewSet):
     http_method_names = ['get', 'put', 'patch', 'head', 'options']
     serializer_class = EmployerSerializer
     permission_classes = [IsOwnUserOrReadOnlyEmployer, IsAuthenticated]
+    lookup_url_kwarg = "id"
     def get_queryset(self):
         return Employer.objects \
         .select_related('user') \
@@ -189,13 +192,26 @@ class JobDetailViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, IsOwnUserOrReadOnlyEmployer2]
     serializer_class = JobDetailSerializer
     
+    def dispatch(self, request, *args, **kwargs):
+        parent_view = EmployerViewSet.as_view({"get": "retrieve"})
+        original_method = request.method
+        request.method = "GET"
+        parent_kwargs = {"id": kwargs["employer_id"]}
+
+        parent_response = parent_view(request, *args, **parent_kwargs)
+        if parent_response.exception:
+            return parent_response
+
+        request.method = original_method
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         return JobDetail.objects \
             .filter(employer__user_id=self.request.user.id) \
             .select_related('employer', 'field_of_Study')
 
     def get_serializer_context(self):
-        return {'employer_pk': self.kwargs['employer_pk']}
+        return {'employer_pk': self.kwargs['employer_id']}
 
  
 class JobDetailAllUserViewSet(ModelViewSet):
@@ -222,6 +238,21 @@ class BasicInformationOfOrganizationViewSet(ModelViewSet):
     permission_classes = [IsOwnUserOrReadOnlyEmployer2, IsAuthenticated]
     serializer_class = BasicInformationOfOrganizationSerializer
     
+    def dispatch(self, request, *args, **kwargs):
+        parent_view = EmployerViewSet.as_view({"get": "retrieve"})
+        original_method = request.method
+        request.method = "GET"
+        parent_kwargs = {"id": kwargs["employer_id"]}
+
+        parent_response = parent_view(request, *args, **parent_kwargs)
+        if parent_response.exception:
+            return parent_response
+
+        request.method = original_method
+        return super().dispatch(request, *args, **kwargs)
+
+    
+    
     def get_queryset(self):
         return BasicInformationOfOrganization.objects \
             .filter(employer__user_id=self.request.user.employer.id) \
@@ -241,27 +272,73 @@ class BasicInformationOfOrganizationAllUserViewSet(ModelViewSet):
 class EmployerLanguageViewSet(ModelViewSet):
     serializer_class = EmployerLanguageSerializer
     
+    def dispatch(self, request, *args, **kwargs):
+        parent_view = EmployerViewSet.as_view({"get": "retrieve"})
+        original_method = request.method
+        request.method = "GET"
+        parent_kwargs = {"id": kwargs["employer_id"]}
+
+        parent_response = parent_view(request, *args, **parent_kwargs)
+        if parent_response.exception:
+            return parent_response
+
+        request.method = original_method
+        return super().dispatch(request, *args, **kwargs)
+
+    
+    
     def get_queryset(self):
-        return Language.objects.select_related('languagetitle','jobdetail') \
+        return Language.objects \
+            .select_related('languagetitle', 'jobdetail', 'jobseeker', 'employer') \
             .filter(jobdetail__employer__user_id=self.request.user.employer.id)
 
     def get_serializer_context(self):
-        return {'employer_id': self.kwargs['employer_pk']}
+        return {'employer_id': self.kwargs['employer_id']}
  
  
 class EmployerSoftwareSkillViewSet(ModelViewSet):
     serializer_class = EmployerSoftwareSkillSerializer
 
+    def dispatch(self, request, *args, **kwargs):
+        parent_view = EmployerViewSet.as_view({"get": "retrieve"})
+        original_method = request.method
+        request.method = "GET"
+        parent_kwargs = {"id": kwargs["employer_id"]}
+
+        parent_response = parent_view(request, *args, **parent_kwargs)
+        if parent_response.exception:
+            return parent_response
+
+        request.method = original_method
+        return super().dispatch(request, *args, **kwargs)
+
+    
+
     def get_queryset(self):
         return SoftwareSkill.objects \
             .filter(jobdetail__employer__user_id=self.request.user.employer.id) \
-            .order_by('id').select_related('softwareskillcategory' ,'title' ,'jobdetail')
+            .order_by('id') \
+            .select_related('softwareskillcategory' ,'title', 'jobdetail', 'jobseeker', 'employer')
     
     def get_serializer_context(self):
         return {'employer_id': self.request.user.employer.id}
 
 class ApplicantViewSet(ModelViewSet):
     serializer_class = JobSeekerApplicantSerializer
+    permission_classes = [IsAuthenticated, IsOwnUserOrReadOnly]
+    
+    def dispatch(self, request, *args, **kwargs):
+        parent_view = JobSeekerViewSet.as_view({"get": "retrieve"})
+        original_method = request.method
+        request.method = "GET"
+        parent_kwargs = {"id": kwargs["jobseeker_id"]}
+
+        parent_response = parent_view(request, *args, **parent_kwargs)
+        if parent_response.exception:
+            return parent_response
+
+        request.method = original_method
+        return super().dispatch(request, *args, **kwargs)
     
     def get_queryset(self):
         return Applicant.objects \
@@ -274,14 +351,53 @@ class ApplicantViewSet(ModelViewSet):
 
 class EmployerApplicantViewSet(ModelViewSet):
     http_method_names = ['get', 'put', 'patch', 'head', 'options']
-    
+    permission_classes = [IsAuthenticated, IsOwnUserOrReadOnlyEmployer2]
     serializer_class = EmployerApplicantSerializer
+    
+    def dispatch(self, request, *args, **kwargs):
+        parent_view = EmployerViewSet.as_view({"get": "retrieve"})
+        original_method = request.method
+        request.method = "GET"
+        parent_kwargs = {"id": kwargs["employer_id"]}
+
+        parent_response = parent_view(request, *args, **parent_kwargs)
+        if parent_response.exception:
+            return parent_response
+
+        request.method = original_method
+        return super().dispatch(request, *args, **kwargs)
+
     
     def get_queryset(self):
         return Applicant.objects \
             .select_related('jobseeker', 'jobdetail') \
             .filter(jobdetail__employer__user_id=self.request.user.id)
             
+    def get_serializer_context(self):
+        return {'jobdetail_id': self.request.user.employer.jobdetail_set}
+
+
+class EmployerEducationalBackgroundViewSet(ModelViewSet):
+    serializer_class = EmployerEducationalBackgroundSerializer
+    
+    def dispatch(self, request, *args, **kwargs):
+        parent_view = EmployerViewSet.as_view({"get": "retrieve"})
+        original_method = request.method
+        request.method = "GET"
+        parent_kwargs = {"id": kwargs["employer_id"]}
+
+        parent_response = parent_view(request, *args, **parent_kwargs)
+        if parent_response.exception:
+            return parent_response
+
+        request.method = original_method
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return EducationalBackground.objects \
+            .select_related('jobseeker', 'jobdetail', 'employer') \
+            .filter(jobdetail__employer__user_id=self.request.user.id)
+    
     def get_serializer_context(self):
         return {'jobdetail_id': self.request.user.employer.jobdetail_set}
 

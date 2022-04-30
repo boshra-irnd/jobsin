@@ -208,7 +208,7 @@ class JobDetailSerializer(serializers.ModelSerializer):
                   'job_description', 'jobdetail_language', 'jobdetail_softwareskill']
         
     def create(self, validated_data):
-        employer_id = self.context['employer_id']
+        employer_id = self.context['employer_pk']
         return JobDetail.objects.create(employer_id=employer_id,**validated_data)
     
     def validate(self, data):
@@ -271,3 +271,25 @@ class EmployerApplicantSerializer(serializers.ModelSerializer):
         model = Applicant
         fields = ['id', 'jobseeker', 'cover_letter', 'jobdetail', 'created', 'applicant_status']
         
+ 
+class EmployerEducationalBackgroundSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EducationalBackground
+        fields = ['jobdetail', 'degree_level', 'field_of_Study', 'university',
+                  'gpa', 'from_year', 'from_month',
+                  'to_year', 'to_month', 'studying']
+    
+    def create(self, validated_data):
+        jobseeker_id = self.context['jobseeker_id']
+        return EducationalBackground.objects.create(jobseeker_id=jobseeker_id,**validated_data)
+    
+    def validate(self, data):
+        if data['from_year'] > data['to_year']:
+            raise serializers.ValidationError(
+            {"to_year": "finish must occur after start"})
+        elif data['from_year'] == data['to_year']:
+            if data['from_month'] >= data['to_month']:
+                raise serializers.ValidationError(
+                    {"to_month": "finish must occur after start"})
+        return data
+    

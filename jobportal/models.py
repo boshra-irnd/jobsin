@@ -117,6 +117,8 @@ class EducationalBackground(models.Model):
     MONTH_CHOICES = [(m,m) for m in range(1,13)]
     
     jobseeker = models.ForeignKey(JobSeeker,on_delete=models.CASCADE, related_name='jobseeker_educationalbackground')
+    jobdetail = models.ForeignKey('JobDetail',on_delete=models.PROTECT, related_name='jobdetail_educationalbackground', null=True, blank=True)
+    employer = models.ForeignKey('Employer', on_delete=models.PROTECT, related_name='employer_educationalbackground', null=True, blank=True)
     degree_level = models.CharField(max_length=2, choices=DEGREE_LEVEL)
     field_of_Study = models.ForeignKey('FieldOfStudy', on_delete=models.CASCADE)
     university = models.CharField(max_length=255)
@@ -148,6 +150,12 @@ class EducationalBackground(models.Model):
             ['from_year', 'to_year'],
             ['from_month', 'to_month']
             ]
+        constraints = [
+            models.CheckConstraint(
+                check=Q(jobseeker__isnull=False) | Q(jobdetail__isnull=False),
+                name='not_both_null4'
+            )
+        ]
 
 class SoftwareSkillCategory(models.Model):
     category_title = models.CharField(max_length=255,)
@@ -220,6 +228,9 @@ class Employer(models.Model):
     phone_number = models.CharField(max_length=11)
     organization_level = models.CharField(max_length=55)
     direct_corporate_phone_number = models.CharField(max_length=10)
+    
+    def __str__(self):
+        return self.user.first_name +' '+ self.user.last_name
     
     
 class BasicInformationOfOrganization(models.Model):

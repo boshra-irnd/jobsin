@@ -4,7 +4,8 @@ from .models import (JobSeeker, LanguageTitle, WorkExperience,
                      Language, SoftwareSkill, City, State, 
                      SoftwareSkillCategory, SoftwareSkillTitle,
                      Employer, BasicInformationOfOrganization,
-                     FieldOfStudy, JobDetail, JobCategory, Applicant)
+                     FieldOfStudy, JobDetail, JobCategory, 
+                     Applicant, EducationalBackground)
 from django.db.models.aggregates import Count
 # Register your models here.
 
@@ -32,12 +33,12 @@ class StateAdmin(admin.ModelAdmin):
     list_display = ['name']
     list_per_page = 10
     
-    
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
     list_display = ['name', 'state_name', 'jobseeker_count']
     list_per_page = 10
     list_select_related = ['state']
+    list_display_links = ['state_name']
 
     def state_name(self, city):
         return city.state.name    
@@ -52,7 +53,8 @@ class CityAdmin(admin.ModelAdmin):
     
 @admin.register(SoftwareSkill)
 class SoftwareSkillsAdmin(admin.ModelAdmin):
-    list_display = ['softwareskillcategory', 'title', 'skill_level']
+    list_display = ['jobseeker','jobdetail', 'employer', 
+                    'softwareskillcategory', 'title', 'skill_level']
     list_per_page = 10
     
     
@@ -66,11 +68,10 @@ class SoftwareSkillsTitleAdmin(admin.ModelAdmin):
 class LanguageTitleAdmin(admin.ModelAdmin):
     list_display = ['title']
     list_per_page = 10
-
   
 @admin.register(Language)
 class LanguagesAdmin(admin.ModelAdmin):
-    list_display = ['languagetitle', 'skill_level']
+    list_display = ['jobseeker','jobdetail', 'employer', 'languagetitle', 'skill_level']
     list_per_page = 10
     
     
@@ -88,10 +89,9 @@ class SoftwareSkillCategoryAdmin(admin.ModelAdmin):
     list_display = ['category_title',]
     list_per_page = 10
     
-    
 @admin.register(Employer)
 class EmployerAdmin(admin.ModelAdmin):
-    list_display = ['user_id', 'phone_number', 'organization_level',
+    list_display = ['user', 'phone_number', 'organization_level',
                     'direct_corporate_phone_number']
     list_per_page = 10        
  
@@ -133,3 +133,9 @@ class JobCategoryAdmin(admin.ModelAdmin):
 class ApplicantAdmin(admin.ModelAdmin):
     list_display = ['jobseeker', 'cover_letter', 'jobdetail', 'created', 'applicant_status']
     list_per_page = 10        
+
+@admin.register(EducationalBackground)
+class EducationalBackgroundAdmin(admin.ModelAdmin):
+    list_display = ['jobseeker', 'degree_level', 'field_of_Study',
+                    'university', 'gpa', 'from_year', 'to_year',
+                    'from_month', 'to_month', 'studying']
