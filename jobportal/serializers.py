@@ -280,8 +280,8 @@ class EmployerEducationalBackgroundSerializer(serializers.ModelSerializer):
                   'to_year', 'to_month', 'studying']
     
     def create(self, validated_data):
-        jobseeker_id = self.context['jobseeker_id']
-        return EducationalBackground.objects.create(jobseeker_id=jobseeker_id,**validated_data)
+        jobdetail_id = self.context['jobdetail_id']
+        return EducationalBackground.objects.create(jobdetail_id=jobdetail_id,**validated_data)
     
     def validate(self, data):
         if data['from_year'] > data['to_year']:
