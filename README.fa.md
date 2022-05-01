@@ -1,29 +1,27 @@
 # جابسین
-___
-## _ برای سایت کاریابی API یک _
+
+## _ یک API برای سایت کاریابی _
 
 این پروژه برای ارائه به عنوان نمونه کار با زبان برنامه نویسی python و DjangoRestframework انجام شده است
-![alt text](https://miro.medium.com/max/700/1*kR89JbQQK9aAkNVyxE63pg.png)
-
-> Django REST framework is an open source, flexible and fully-featured library  with modular and customizable architecture that aims at building sophisticated  web APIs and uses Python and Django.
+<img src="https://miro.medium.com/max/700/1*kR89JbQQK9aAkNVyxE63pg.png" width="400" height="250" />
 
 ## مراجع دیگر
-___
+
 [مستندات به زبان انگلیسی](https://github.com/boshra-irnd/jobsin/blob/master/README.mdd)
 
 
 
 
 ## کارفرما
-___
-کارفرما میتواند با استفاده از نام کاربری و رمز عبور ثبت نام کرده و وارد شود.
+
+کارفرما میتواند با استفاده از نام کاربری و رمز عبور ثبت نام کرده و وارد شود
 و
 - موقعیت های شغلی را ایجاد کند
 - اطلاعات کارجویانی که برای موقعیت شغلی تعریف شده توسط کارفرما درخواست فرستاده اند را ببیند
 - وضعیت درخواست کارجویان را به یکی از چهار مورد درحال بررسی یا رد شده یا مصاحبه و یا استخدام تغییر بدهند
 
 ## کارجو
-___
+
 کارجو میتواند با استفاده از نام کاربری و رمزعبور ثبت نام کرده و وارد شود
 و
 - آگهی های ثبت شده توسط کارفرماها را ببینند
