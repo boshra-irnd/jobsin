@@ -1,21 +1,20 @@
 # Jobsin
-___
+
 ## _ A complete API for job portal _
 
 This project is done as an example of my work with Python programming language and Django framework.
-![alt text](https://miro.medium.com/max/700/1*kR89JbQQK9aAkNVyxE63pg.png)
-
+<img src="https://miro.medium.com/max/700/1*kR89JbQQK9aAkNVyxE63pg.png" width="400" height="250" />
 > Django REST framework is an open source, flexible and fully-featured library  with modular and customizable architecture that aims at building sophisticated  web APIs and uses Python and Django.
 
 ## Service reference
-___
+
 [Documentation in Persian](https://github.com/boshra-irnd/jobsin/blob/master/README.fa.md)  <img src="https://cdn.countryflags.com/thumbs/iran/flag-round-250.png" width="15" height="15" />
 
 
 
 
 ## Employer
-___
+
 Employer can register using username and password.
 
 - Post job opportunities
@@ -23,7 +22,7 @@ Employer can register using username and password.
 - Change their request to one of four options Pending, Rejected, Interview and Hire.
 
 ## Jobseeker
-___
+
 Jobseeker can register using username and password.
 
 - See details of work
